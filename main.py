@@ -7,19 +7,16 @@ TOKEN = config.token
 
 @bot.event
 async def on_ready():
-    os.system('clear')
-    await bot.change_presence(activity=discord.Game(name="with my balls"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="women being stupid"))
     print(f'\x1b[35m\n Logged in as {bot.user}\n\x1b[0m')
 
-
 teal = 0x1abc9c
-
+trollface = var.trollface
 
 @bot.command()
 async def help(ctx):
-    embed=discord.Embed(title="All the commands!", color=teal, description="The prefix: >\nCatgirl: Sends a catgirl image\nRoll: Rolls a die\nAvatar: Shows userers avatar\nCat: Sends a cat image\nTroll: Does a lil trolling\nSource: Link to source code")
+    embed=discord.Embed(title="All the commands!", color=teal, description="The prefix: >\nCatgirl: Sends a catgirl image\nRoll: Rolls a die\nAvatar: Shows userers avatar\nCat: Sends a cat image\nTroll: Does a lil trolling\nBan: Bans a user\nUnban: Unbans a user\nSource: Link to source code")
     await ctx.send(embed=embed)
-
 
 @bot.command()
 async def source(ctx):
@@ -28,7 +25,7 @@ async def source(ctx):
 
 @bot.command()
 async def catgirl(ctx):
-    embed=discord.Embed(title="Catgirl", url="https://nekos.life/", description="Cool", color=teal)
+    embed=discord.Embed(title="Catgirl", description="Cool", color=teal)
     embed.set_image(url=(nekos.img('neko')))
     await ctx.send(embed=embed)
 
@@ -48,7 +45,7 @@ async def avatar(ctx):
 
 @bot.command()
 async def cat(ctx):
-    embed=discord.Embed(title="Cat", url="https://nekos.life/", description="Cute cat too", color=teal)
+    embed=discord.Embed(title="Cat", description="Cute cat too", color=teal)
     embed.set_image(url=(nekos.cat()))
     await ctx.send(embed=embed)
 
@@ -56,12 +53,40 @@ async def cat(ctx):
 @bot.command()
 async def troll(ctx, member:discord.Member=None):
     if member is None:
-        embed=discord.Embed(title="Troll", url="https://api.nekos.cc/troll", description=f'{ctx.author.name} wants to do a little trolling', color=teal)
-        embed.set_image(url=('https://api.nekos.cc/troll'))
+        embed=discord.Embed(title="Troll", description=f'{ctx.author.name} does a little trolling', color=teal)
+        embed.set_image(url=trollface)
         await ctx.send(embed=embed)
     else:
-        embed=discord.Embed(title="Troll", url="https://api.nekos.cc/troll", description=f'{ctx.author.name} trolls {member.name} :trolley:', color=teal)
-        embed.set_image(url=('https://api.nekos.cc/troll'))
+        embed=discord.Embed(title="Troll", description=f'{ctx.author.name} trolls {member.name}', color=teal)
+        embed.set_image(url=trollface)
         await ctx.send(embed=embed)
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please pass in all requirements')
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("You dont have all the requirements")
+
+@bot.command()
+@commands.has_permissions(ban_members = True)
+async def ban(ctx, member : discord.Member, *, reason = None):
+    await member.ban(reason = reason)
+
+@bot.command()
+@commands.has_permissions(administrator = True)
+async def unban(ctx, *, member):
+    banned_users = await ctx.guild.bans()
+    member_name, member_discriminator = member.split("#")
+
+    for ban_entry in banned_users:
+        user = ban_entry.user
+
+        if (user.name, user.discriminator) == (member_name, member_discriminator):
+            await ctx.guild.unban(user)
+            await ctx.send(f'Unbanned {user.mention}')
+            return
+
+
 
 bot.run(TOKEN)
